@@ -1,53 +1,57 @@
-/*
-
-  * Programa: Reservas Ambientais
-  * Data de criação: 04/10/2023
-  * Autor: Crystian Fonseca Morgado
-  * Objetivo: Servir de Prototipo, 
-              afim de criar um pro-
-              grama para reservas
-              ambientais.
-  * Versão: 2.0
-  
-*/
-
-
 #include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <conio.h>
+#include <windows.h>
+#include <time.h>
 
 #define MAX_RESERVAS 100
 
+
+void exibirMenu();
 
 struct ReservaLegal {
     char nome[50];
     double area;
     char regiao[50];
+    int idReserva;
 };
 
 struct Pessoa {
     char nome[50];
     char endereco[100];
     double hectares;
+    int idPessoa;
 };
 
 struct ReservaLegal reservas[MAX_RESERVAS]; // Array de reservas legais
 int numReservas = 0; // Número de reservas cadastradas
 
 
-void cadastrarReservaLegal() {
+double cadastrarReservaLegal() {
     struct ReservaLegal reserva;
+    struct Pessoa pessoa;
     
-    printf("Nome da reserva legal: ");
+    srand(time(NULL)); // criar ID
+    int id = rand() % 32592;
+    
+    int *idReservaPtr = &reserva.idReserva, 
+    	*idPessoaPtr = &pessoa.idPessoa;
+    	
+    *idReservaPtr = id, *idPessoaPtr = id;
+    
+    printf("\033[1;32m--Cadastro Reserva Legal--      id: %d\033[0m\n\n", id);
+    
+    printf("Nome da reserva legal:\033[1;32m ");
     fgets(reserva.nome, sizeof(reserva.nome), stdin);
     
-    printf("Área da reserva legal: ");
-    scanf("%f", &reserva.area);
+    printf("\033[0mÁrea da reserva legal:\033[1;32m ");
+    scanf("%lf", &reserva.area);
     
-    printf("Região onde se encontra a reserva legal: ");
+    exibirMenu();
+    printf("\033[0mRegião onde se encontra a reserva legal:\033[1;32m ");
     getchar(); // Limpar o caractere de nova linha residual
     
     char regiao[50];
@@ -81,11 +85,17 @@ void cadastrarReservaLegal() {
     
     reservas[numReservas] = reserva; // Registrar a reserva no array
     
-    printf("\033[1;32mDados da reserva legal cadastrados com sucesso!\033[0m\n");
-    numReservas++; // Incrementar o contador de reservas
+    printf("\n---------------------------------------------------\n");
+    printf("| Dados da reserva legal cadastrados com sucesso! |");
+    printf("\n---------------------------------------------------\033[0m");
+	numReservas++; // Incrementar o contador de reservas
+    
+    sleep(2);
+    system("cls");
     
     int numPessoas;
-    printf("\n\nQuantas pessoas você deseja cadastrar? ");
+    printf("\033[1;32m--Ficha de Cadastro do Indivíduo--      id: %d\033[0m\n\n", id);
+    printf("Quantas pessoas você deseja cadastrar?\033[1;32m ");
     scanf("%d", &numPessoas);
     
     FILE *arquivoPessoas = fopen("pessoas.dat", "ab");
@@ -94,29 +104,31 @@ void cadastrarReservaLegal() {
         return;
     }
     
-    float areaReservaAtual = 0.0;  // Armazena a área total de reserva legal atualmente cadastrada
+    double areaReservaAtual = 0.0;  // Armazena a área total de reserva legal atualmente cadastrada
     
     i = 0;
     while (i < numPessoas) {
-        struct Pessoa pessoa;
         
         getchar(); // Limpar o caractere de nova linha residual
         
-        printf("\nInformações da pessoa %d:\n", i+1);
+        printf("\n\n\033[0mInformações da pessoa \033[1;32m%d\033[0m:\n", i+1);
         
-        printf("Nome completo: ");
+        printf("\nNome completo:\033[1;32m ");
         fgets(pessoa.nome, sizeof(pessoa.nome), stdin);
         
-        printf("Endereço: ");
+        printf("\033[0mEndereço:\033[1;32m ");
         fgets(pessoa.endereco, sizeof(pessoa.endereco), stdin);
         
-        printf("Quantidade de hectares: ");
-        scanf("%f", &pessoa.hectares);
+        printf("\033[0mQuantidade de hectares:\033[1;32m ");
+        scanf("%lf", &pessoa.hectares);
+        
+        if(numPessoas - 1 > i)
+        	printf("\n\033[1;34m----------------------------------------------\033[0m");
         
         // Verificação da área de reserva legal
-        float areaReservaMinima;
+        double areaReservaMinima;
         
-        if (strcmp(reserva.regiao, "florestas") == 0) {
+        if (strcmp(reserva.regiao, "florestas\n") == 0) {
             areaReservaMinima = 0.8 * pessoa.hectares;
         } else if (strcmp(reserva.regiao, "cerrado\n") == 0) {
 			areaReservaMinima = 0.35 * pessoa.hectares;
@@ -124,11 +136,22 @@ void cadastrarReservaLegal() {
 			areaReservaMinima = 0.2 * pessoa.hectares;
 			}
     
+    //reserva.area = reserva legal
+    //pessoa.hectares = agricultura
+    //areaReservaMinima = a area que a reserva legal tem que ter
+    
      if (areaReservaAtual + areaReservaMinima <= reserva.area) {
         fwrite(&pessoa, sizeof(struct Pessoa), 1, arquivoPessoas);
         areaReservaAtual += areaReservaMinima;
     } else {
-        printf("Não é possível adicionar essa pessoa à reserva legal. Limite de área excedido.\n");
+    	printf("\033[0;31m\n----------------------------------------------------------------------------------\n");
+        printf("| Não é possível adicionar essa pessoa à reserva legal. Limite de área excedido! |");
+        printf("\n----------------------------------------------------------------------------------\033[0m");
+        
+        sleep(2);
+        fclose(arquivoPessoas);
+        system("cls");
+        return;
     }
     
     i++; // Incrementar o contador
@@ -136,57 +159,63 @@ void cadastrarReservaLegal() {
 
 fclose(arquivoPessoas);
 
-printf("Dados das pessoas cadastrados com sucesso!\n");
-getch();
+printf("\033[1;32m\n---------------------------------\n");
+printf("| Dados analisados com sucesso! |");
+printf("\n---------------------------------\033[0m");
+
+sleep(2);
 system("cls");
+return areaReservaAtual;
 }
 
 void visualizarReservasLegais() {
-    printf("Reservas Legais Cadastradas:\n");
-    int i;
-    for (i = 0; i < numReservas; i++) {
-        printf("Reserva %d:\n", i + 1);
-        printf("Nome: %s", reservas[i].nome);
-        printf("Área: %.2f\n", reservas[i].area);
-        printf("Região: %s\n", reservas[i].regiao);
-        printf("--------------------------------\n");
-    }
+    printf("\033[1;32m--Visualizar Reservas--\033[0m\n\n");
+    printf("\nReservas Legais Cadastradas:\n");
     
     FILE *arquivoReservas = fopen("reservas.dat", "rb");
     if (arquivoReservas == NULL) {
-        printf("Erro ao abrir o arquivo de reservas.\n");
+        printf("\n\033[0;31m----------------------------------------\n");
+        printf("| Erro ao abrir o arquivo de reservas. |");
+        printf("\n----------------------------------------\033[0m\n");
+        sleep(2);
+        
         return;
     }
 
     struct ReservaLegal reserva;
     while (fread(&reserva, sizeof(struct ReservaLegal), 1, arquivoReservas)) {
-        int reservaIndex = numReservas;
-        printf("\nReserva %d:\n", reservaIndex + 1);
-        printf("Nome: %s", reserva.nome);
-        printf("Área: %.2f\n", reserva.area);
-        printf("Região: %s\n", reserva.regiao);
-        printf("--------------------------------\n");
-        numReservas++; // Incrementar o contador de reservas
+        printf("\nReserva:\n");
+        printf("Nome:\033[1;32m %s", reserva.nome);
+        printf("\033[0mÁrea:\033[1;32m %.2f\n", reserva.area);
+        printf("\033[0mRegião:\033[1;32m %s", reserva.regiao);
+        printf("\033[0mId:\033[1;32m %d\n\n", reserva.idReserva);
+        printf("\033[1;34m--------------------------------\n\033[0m");
+
+        FILE *arquivoPessoas = fopen("pessoas.dat", "rb");
+        if (arquivoPessoas == NULL) {
+            printf("\n\033[0;31m---------------------------------------\n");
+            printf("| Erro ao abrir o arquivo de pessoas. |");
+            printf("\n---------------------------------------\033[0m\n");
+            sleep(2);
+            return;
+        }
+
+        struct Pessoa pessoa;
+        while (fread(&pessoa, sizeof(struct Pessoa), 1, arquivoPessoas)) {
+            if (pessoa.idPessoa == reserva.idReserva) {
+                printf("\nIndivíduo:\n");
+                printf("Nome:\033[1;32m %s", pessoa.nome);
+                printf("\033[0mEndereço:\033[1;32m %s", pessoa.endereco);
+                printf("\033[0mQuantidade de hectares:\033[1;32m %.2f\n", pessoa.hectares);
+                printf("\033[0mId:\033[1;32m %d\n", pessoa.idPessoa);
+                printf("\n\033[1;34m--------------------------------\n\033[0m");
+            }
+        }
+
+        fclose(arquivoPessoas);
     }
 
     fclose(arquivoReservas);
-
-    FILE *arquivoPessoas = fopen("pessoas.dat", "rb");
-    if (arquivoPessoas == NULL) {
-        printf("Erro ao abrir o arquivo de pessoas.\n");
-        return;
-    }
-
-    struct Pessoa pessoa;
-    while (fread(&pessoa, sizeof(struct Pessoa), 1, arquivoPessoas)) {
-        printf("Pessoa:\n");
-        printf("Nome: %s", pessoa.nome);
-        printf("Endereço: %s", pessoa.endereco);
-        printf("Quantidade de hectares: %.2f\n", pessoa.hectares);
-        printf("--------------------------------\n");
-    }
-
-    fclose(arquivoPessoas);
 
     // Verificar se a tecla "Esc" foi pressionada
     if (getch() == 27) {
@@ -197,27 +226,62 @@ void visualizarReservasLegais() {
 
 
 
-void adicionarPessoaReserva() {
-    int numReserva;
-    printf("Digite o número da reserva em que deseja adicionar uma pessoa: ");
-    scanf("%d", &numReserva);
-    getchar(); // Limpar o caractere de nova linha residual
 
-    if (numReserva <= 0 || numReserva > numReservas) {
-        printf("Número de reserva inválido.\n");
+int adicionarPessoaReserva(double areaReservaAtual) {
+    int numId;
+    int reservaEncontrada = 0; // Variável para verificar se a reserva foi encontrada
+    
+    printf("\033[1;32m--Adição de Indivíduo na Reserva--\033[0m\n\n");
+    
+    struct ReservaLegal reserva;
+    struct Pessoa pessoa;
+
+    printf("\nDigite o \033[1;32mID\033[0m da reserva em que deseja adicionar um indivíduo:\033[1;32m ");
+    scanf("%d", &numId);
+    getchar();
+    
+    FILE *arquivoReservas = fopen("reservas.dat", "rb");
+    if (arquivoReservas == NULL) {
+        printf("\n\033[0;31m---------------------------------------\n");
+        printf("| Erro ao abrir o arquivo de reservas. |");
+        printf("\n---------------------------------------\033[0m");
+        sleep(2);
         return;
+    }
+    
+    while (fread(&reserva, sizeof(struct ReservaLegal), 1, arquivoReservas)) {
+        if (numId == reserva.idReserva) {
+            reservaEncontrada = 1; // Reserva foi encontrada
+            break;
+        }
+    }
+    
+    fclose(arquivoReservas);
+    
+    if (!reservaEncontrada) {
+        printf("\n\033[0;31m----------------\n");
+        printf("| ID inválido. |\n");
+        printf("----------------\033[0m");
+        sleep(2);
+        return;
+    } else {
+        // O ID da pessoa será definido aqui
+        int *idPessoaPtr = &pessoa.idPessoa;
+        *idPessoaPtr = numId;
     }
 
     FILE *arquivoPessoas = fopen("pessoas.dat", "ab");
     if (arquivoPessoas == NULL) {
-        printf("Erro ao abrir o arquivo de pessoas.\n");
+        printf("\n\033[0;31m---------------------------------------\n");
+        printf("| Erro ao abrir o arquivo de pessoas. |");
+        printf("\n---------------------------------------\033[0m");
+        sleep(2);
         return;
     }
 
-    struct ReservaLegal reserva = reservas[numReserva - 1];
     float areaReservaMinima;
 
-    if (strcmp(reserva.regiao, "florestas") == 0) {
+    if (strcmp(reserva.regiao, "florestas\n") == 0) {
         areaReservaMinima = 0.8 * reserva.area;
     } else if (strcmp(reserva.regiao, "cerrado\n") == 0) {
         areaReservaMinima = 0.35 * reserva.area;
@@ -225,20 +289,16 @@ void adicionarPessoaReserva() {
         areaReservaMinima = 0.2 * reserva.area;
     }
 
-    float areaReservaAtual = 0.0;
+    printf("\nInformações do indivíduo:\n");
 
-    struct Pessoa pessoa;
-
-    printf("\nInformações da pessoa:\n");
-
-    printf("Nome completo: ");
+    printf("\033[0mNome completo:\033[1;32m ");
     fgets(pessoa.nome, sizeof(pessoa.nome), stdin);
 
-    printf("Endereço: ");
+    printf("\033[0mEndereço:\033[1;32m ");
     fgets(pessoa.endereco, sizeof(pessoa.endereco), stdin);
 
-    printf("Quantidade de hectares: ");
-    scanf("%f", &pessoa.hectares);
+    printf("\033[0mQuantidade de hectares:\033[1;32m ");
+    scanf("%lf", &pessoa.hectares);
     getchar(); // Limpar o caractere de nova linha residual
 
     // Verificar se é possível adicionar a pessoa à reserva
@@ -247,25 +307,21 @@ void adicionarPessoaReserva() {
         fwrite(&pessoa, sizeof(struct Pessoa), 1, arquivoPessoas);
         areaReservaAtual += areaReservaMinima;
 
-        // Atualizar o arquivo de reservas com a nova área
-        FILE *arquivoReservas = fopen("reservas.dat", "rb+");
-        if (arquivoReservas == NULL) {
-            printf("Erro ao abrir o arquivo de reservas.\n");
-            return;
-        }
+        fclose(arquivoPessoas);
 
-        fseek(arquivoReservas, (numReserva - 1) * sizeof(struct ReservaLegal), SEEK_SET);
-        fwrite(&reserva, sizeof(struct ReservaLegal), 1, arquivoReservas);
-
-        fclose(arquivoReservas);
-
-        printf("Pessoa adicionada à reserva com sucesso!\n");
+        printf("\n\033[1;32m-----------------------------------------------\n");
+        printf("| Indivíduo adicionado à reserva com sucesso! |");
+        printf("\n-----------------------------------------------\033[0m\n");
+        sleep(2);
     } else {
-        printf("Não é possível adicionar essa pessoa à reserva legal. Limite de área excedido.\n");
+        printf("\n\033[0;31m-------------------------------------------------------------------------------------\n");
+        printf("| Não é possível adicionar esse indivíduo à reserva legal. Limite de área excedido. |");
+        printf("\n-------------------------------------------------------------------------------------\033[0m\n");
+        sleep(2);
+        fclose(arquivoPessoas);
     }
-
-    fclose(arquivoPessoas);
 }
+
 
 void menu() {
 	printf("\033[0;32mMenu de Funções:\033[0m \n\n");
@@ -274,15 +330,26 @@ void menu() {
 	printf("\n\033[0;36m------------------------------------------------------------------------------------------\033[0m"); // Estética
 	printf("\n    1       Cadastrar reserva legal");
 	printf("\n    2       Visualizar reservas legais cadastradas");
-	printf("\n    3       Adicionar pessoa a uma reserva legal existente");
+	printf("\n    3       Adicionar indivíduo a uma reserva legal existente");
 	printf("\n    4       Sair");
 	printf("\n\033[0;36m------------------------------------------------------------------------------------------\033[0m"); // Estética
-	printf("\n\n\033[1;31mQual função deseja afetuar?\033[0m ");
+	printf("\n\n\033[1;31mQual função deseja afetuar?\033[1;32m ");
 }
 
+void exibirMenu(){
+	printf("\n\033[1;34m------------------------------------");
+	printf("\n|                                  |");
+	printf("\n|\033[1;32m           Campos gerais          \033[1;34m|");
+	printf("\n|\033[1;33m           Cerrado                \033[1;34m|");
+	printf("\n|\033[0;32m           Florestas              \033[1;34m|");
+	printf("\n|                                  |");
+	printf("\n------------------------------------\033[0m\n\n");
+}
 
 int main() {
     int opcao;
+    double areaReservaAtual;
+    
 	setlocale(LC_ALL, "Portuguese");
 	
     do {
@@ -293,21 +360,27 @@ int main() {
 		system("cls");
         switch (opcao) {
             case 1:
-                cadastrarReservaLegal();
+                areaReservaAtual = cadastrarReservaLegal();
                 break;
             case 2:
                 visualizarReservasLegais();
                 break;
             case 3:
-            	adicionarPessoaReserva();
+            	adicionarPessoaReserva(areaReservaAtual);
             	break;
 			case 4:
-                printf("Programa encerrado.\n");
+				printf("\033[0;31m-----------------------\n");
+                printf("| Programa encerrado. |\n");
+                printf("-----------------------\033[0m");
+                sleep(1);
                 break;
             default:
-                printf("\033[0;31mOpção inválida. Por favor, tente novamente.\033[0m\n");
+            	printf("\033[0;31m-----------------------------------------------\n");
+                printf("| Opção inválida. Por favor, tente novamente. |\n");
+                printf("-----------------------------------------------\033[0m");
+                sleep(2);
         }
-    } while (opcao != 3);
+    } while (opcao != 4);
 
     return 0;
 }
